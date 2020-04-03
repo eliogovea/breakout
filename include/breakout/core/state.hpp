@@ -64,7 +64,7 @@ state::state() {
   b.radius = 0.1;
   b.strength = 1;
   b.is_active = true;
-  b.velocity = {2.0f, 2.0f};
+  b.velocity = {1.0f, 1.0f};
   balls_.push_back(b);
   active_balls_count_ = 1;
 
@@ -80,7 +80,6 @@ void state::update(float dt) {
   if (phase_ != phase::playing) {
     return;
   }
-  std::cout << "UPDATE!!!\n";
   for (auto& ball: balls_) {
     ball.update(dt);
     if (ball.center.x - ball.radius <= min_x) {
@@ -96,7 +95,6 @@ void state::update(float dt) {
       ball.velocity.y = -ball.velocity.y;
     }
   }
-  std::cout << "CHECK COLLISION\n";
   for (auto& ball: balls_) {
     if (!ball.is_active) {
       continue;
@@ -127,7 +125,6 @@ void state::update(float dt) {
       }
     }
     if (collide && ball.velocity.y < 0) {
-      std::cout << "COLLIDE!!!\n";
       ball.velocity.y = -ball.velocity.y;
     }
   }

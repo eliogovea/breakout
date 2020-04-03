@@ -1,3 +1,6 @@
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include <breakout/core/state.hpp>
 
 #include <breakout/graphics/scene.hpp>
@@ -10,6 +13,9 @@ int main() {
 
   graphics::window window{16 * 50, 9 * 50, "breakout"};
   graphics::scene scene(state);
+
+  double last_time = glfwGetTime();
+  double curr_time;
   
   while (!window.is_closed()) {
 
@@ -28,7 +34,9 @@ int main() {
       }
     }
 
-    state.update(0.01);
+    curr_time = glfwGetTime();
+    state.update(curr_time - last_time);
+    last_time = curr_time;
 
     window.clear();
     scene.render();
