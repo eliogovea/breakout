@@ -62,7 +62,7 @@ void object::render() {
   glBindVertexArray(0);
 }
 
-object create_object_from_file(const std::string path) {
+object* create_object_from_file(const std::string path) {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> materials;
@@ -128,7 +128,7 @@ object create_object_from_file(const std::string path) {
     }
   }
 
-  return object{vertices};
+  return new object{vertices};
 }
 
 } // namespace breakout::graphics

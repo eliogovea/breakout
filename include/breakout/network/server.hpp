@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+
+#include <tuple>
 #include <cstdint>
 #include <exception>
 #include <system_error>
@@ -16,17 +19,20 @@
 #include <sys/types.h>
 
 
-namespace breakout::server {
+namespace breakout::network {
+
+enum class message_type {join, command, leave};
 
 class server {
 public:
   explicit server();
   void run();
-  void add_client(const uint32_t ip);
-  void remove_client(const uint32_t ip);
+  void handle_connection();
+  std::string handle_message(const char* msg, const std::size_t size);
 private:
   int32_t socket_;
-  std::vector<uint32_t> clients_ip{};
+
+  std::vector<std::tuple<int32_t, int32_t>> clients_;
   std::deque<std::string> messages_{};
 };
 
@@ -51,9 +57,61 @@ server::server() {
   }
 }
 
+void server::handle_connection() {
+  std::cout << "waiting for a client ...\n";
+
+  struct sockaddr_in client_addr;
+  memset(&client_addr, 0, sizeof(client_addr));
+  socklen_t client_addr_len = sizeof(client_addr);
+
+  const std::size_t max_size = 512;
+  char buffer_[max_size + 1];
+
+  auto msg_size = recvfrom(socket_, buffer_, max_size, MSG_WAITALL,
+                           (struct sockaddr *)&client_addr, &client_addr_len);
+
+  std::cout << "client: " << client_addr.sin_addr.s_addr << "\n";
+
+  
+
+  if (msg_size == -1) {
+    return;
+  }
+
+  buffer_[msg_size] = 0;
+  std::cout << "message received: " << buffer_ << "\n";
+
+  if (std::string{buffer_}.substr(0, 4) == "JOIN") {
+    int32_t port = 0;
+    for (int i = 5; i < msg_size; i++) {
+      port = 10 * port + buffer_[i] - '0';
+    }
+    
+    clients_.push_back({static_cast<int32_t>(client_addr.sin_addr.s_addr), port});
+    client_addr.sin_port = htons(port);
+    // TODO send when the game is about to start
+    std::cout << "sending response, port: " << port << "\n";
+    sendto(socket_, "OK", 2, MSG_CONFIRM,
+         (struct sockaddr *)&client_addr, client_addr_len);
+
+  } else if (std::string{buffer_}.substr(0, 7) == "COMMAND") {
+    // TODO
+  }
+  
+  // TODO handle message
+  // TODO doit properly !!!
+
+  return;
+}
+
+std::string server::handle_message(const char* msg, const std::size_t size) {
+  // TODO
+}
+
 void server::run() {
   // TODO
   while (true) {
+    handle_connection(); // blocking, just for now (testing)
   }
 }
 

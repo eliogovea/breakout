@@ -30,6 +30,8 @@ include_directories(${GLEW_INCLUDE_DIRS})
 # GLFW
 find_package(glfw3 REQUIRED)
 
+find_package(Threads)
+
 set(
   SOURCE_FILES
   src/client.cpp
@@ -44,4 +46,9 @@ target_link_libraries(
   OpenGL::GL 
   GLEW::GLEW
   glfw
+  ${CMAKE_THREAD_LIBS_INIT}
 ) 
+
+add_executable(server
+  src/server.cpp
+)
